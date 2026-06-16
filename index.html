@@ -68,8 +68,6 @@
         /* HIDE SENSITIVE INFO FROM CUSTOMERS */
         .admin-only { display: none !important; }
         #recentClaims, #claimsList, #redeemCountDisplay, .budget-meter, .budget-label, #budgetUsedDisplay, #budgetMeterFill { display: none !important; }
-        /* Only show claim count as simple text without numbers */
-        .claim-count-simple { font-size: 0.7rem; color: #6e6d6a; }
     </style>
 </head>
 <body>
@@ -87,7 +85,7 @@
             <div class="event-title">
                 Claim <span>your</span> discount
             </div>
-            <span class="timer-box" id="timerDisplay">2:45 PM – 6:00 PM</span>
+            <span class="timer-box" id="timerDisplay">4:00 PM – 7:00 PM</span>
         </div>
 
         <div id="permissionError" style="display:none;" class="permission-error">
@@ -132,7 +130,6 @@
         <div class="d-flex justify-content-between flex-wrap" style="font-size:0.7rem; color:#6e6d6a; letter-spacing:0.2px; gap:0.25rem 0.5rem;">
             <span>16 June 2026</span>
             <span>Gugulethu Fasfood</span>
-            <span id="redeemCountDisplay" style="display:none;">0 claimed</span>
         </div>
         <div class="spacer-sm"></div>
         
@@ -209,8 +206,9 @@
     const permissionError = document.getElementById('permissionError');
 
     const TOTAL_BUDGET = 200;
-    const EVENT_START = new Date('2026-06-16T14:45:00+02:00');
-    const EVENT_END = new Date('2026-06-16T18:00:00+02:00');
+    // UPDATED: Event time 4pm to 7pm
+    const EVENT_START = new Date('2026-06-16T16:00:00+02:00');
+    const EVENT_END = new Date('2026-06-16T19:00:00+02:00');
     const COLLECTION_NAME = 'redeemRecords';
     const BUDGET_DOC_ID = 'budget';
 
@@ -295,12 +293,9 @@
     }
 
     function listenForRecords() {
-        // Only listen for the current user's record - no public data shown
         onSnapshot(
             query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'), limit(1)),
             (snapshot) => {
-                // Do NOT display any claim data to customers
-                // This is purely for internal budget tracking
                 const records = [];
                 snapshot.forEach((doc) => {
                     if (doc.id !== BUDGET_DOC_ID) {
@@ -311,9 +306,6 @@
                     }
                 });
                 
-                // Update budget internally
-                let totalClaimed = 0;
-                // We need to get total from budget doc instead
                 const budgetDoc = doc(db, COLLECTION_NAME, BUDGET_DOC_ID);
                 getDoc(budgetDoc).then(docSnap => {
                     if (docSnap.exists()) {
@@ -322,7 +314,6 @@
                     }
                 }).catch(err => console.warn('Could not get budget:', err));
                 
-                // Check if current user has claimed
                 if (currentUser) {
                     const userRecord = records.find(r => r.data.uid === currentUser.uid);
                     if (userRecord) {
@@ -360,7 +351,7 @@
         if (!isEventActive) {
             redeemBtn.disabled = true;
             const now = new Date();
-            redeemBtn.textContent = now < EVENT_START ? 'Event starts at 2:45 PM' : 'Event ended';
+            redeemBtn.textContent = now < EVENT_START ? 'Event starts at 4:00 PM' : 'Event ended';
             return;
         }
         if (budgetRemaining <= 0) {
@@ -507,7 +498,6 @@
             redeemResult.innerHTML = `<span class="redeem-amount">R${awardedAmount.toFixed(2)}</span><span style="display:block;font-size:0.75rem;color:#6e6d6a;margin-top:0.25rem;">claimed · show to cashier</span>`;
             showToast(`You got R${awardedAmount.toFixed(2)}! Show at till.`, 4000);
 
-            // Update budget remaining
             budgetRemaining = Math.max(0, budgetRemaining - awardedAmount);
 
         } catch (error) {
@@ -604,7 +594,7 @@
         }, 5000);
         setTimeout(() => updateRedeemButtonState(), 500);
         
-        console.log('✅ Jika Majika redeem - Customer view (NO budget info shown)');
+        console.log('✅ Jika Majika redeem - Event 4pm to 7pm');
         console.log(`Event: ${EVENT_START.toLocaleString()} → ${EVENT_END.toLocaleString()}`);
         console.log('Total budget: R' + TOTAL_BUDGET + ' (hidden from customers)');
     }
