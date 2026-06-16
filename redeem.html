@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Jika Majika · Gugulethu Fasfood</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f8f6f2; font-family: 'Inter', sans-serif; color: #1d1d1f; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+        .navbar { background: rgba(255,255,255,0.94); backdrop-filter: blur(12px); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
+        .logo { height: 44px; width: auto; object-fit: contain; }
+        .event-badge { background: #1d1d1f; color: white; padding: 0.3rem 1.2rem; border-radius: 60px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap; }
+        .hero-redeem { max-width: 520px; margin: 1.5rem auto; padding: 0 1.25rem; flex: 1; }
+        .card-redeem { background: #ffffff; border-radius: 32px; padding: 2rem 1.5rem; box-shadow: 0 16px 48px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.03); }
+        @media (min-width: 480px) { .card-redeem { padding: 2.5rem 2.2rem; } .hero-redeem { margin: 2.5rem auto; } }
+        .event-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 0.25rem; }
+        .event-title span { color: #f05a2c; }
+        .timer-box { background: #f0eeea; border-radius: 60px; padding: 0.35rem 1.2rem; font-size: 0.75rem; font-weight: 600; color: #1d1d1f; white-space: nowrap; margin-top: 0.25rem; }
+        @media (max-width: 420px) { .event-title { font-size: 1.3rem; } .timer-box { font-size: 0.65rem; padding: 0.25rem 0.8rem; } }
+        .divider { height: 1px; background: #eae8e4; margin: 1.5rem 0; }
+        .btn-primary-fas { background: #1d1d1f; color: white; border: none; padding: 0.9rem 2rem; border-radius: 60px; font-weight: 600; font-size: 1rem; transition: all 0.2s; width: 100%; height: 56px; display: flex; align-items: center; justify-content: center; }
+        .btn-primary-fas:hover { background: #f05a2c; color: white; transform: scale(1.01); }
+        .btn-primary-fas:disabled { opacity: 0.5; transform: none; pointer-events: none; }
+        .btn-google { background: white; border: 1px solid #d9d7d2; padding: 0.8rem 1.5rem; border-radius: 60px; font-weight: 500; transition: all 0.2s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; color: #1d1d1f; height: 56px; font-size: 0.95rem; }
+        .btn-google:hover { background: #f5f3ef; border-color: #1d1d1f; }
+        .btn-google svg { flex-shrink: 0; }
+        .redeem-amount { font-size: 3rem; font-weight: 800; color: #f05a2c; letter-spacing: -0.03em; line-height: 1.1; }
+        .text-muted-fas { color: #6e6d6a; }
+        .profile-pic { width: 44px; height: 44px; border-radius: 44px; object-fit: cover; border: 2px solid #f05a2c; flex-shrink: 0; background: #f0eeea; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #6e6d6a; }
+        .profile-pic.default { border-color: #d9d7d2; }
+        .bg-soft { background: #f8f6f2; border-radius: 60px; padding: 0.6rem 0.8rem; }
+        .footer { text-align: center; padding: 2rem 1.5rem 1.5rem; background: #f8f6f2; color: #6e6d6a; font-size: 0.8rem; border-top: 1px solid #eae8e4; margin-top: auto; letter-spacing: 0.2px; }
+        .footer strong { color: #1d1d1f; font-weight: 600; }
+        .toast-message { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: white; padding: 0.8rem 1.8rem; border-radius: 60px; font-weight: 500; font-size: 0.9rem; z-index: 9999; box-shadow: 0 12px 32px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.25s; pointer-events: none; max-width: 90%; text-align: center; }
+        .toast-message.show { opacity: 1; }
+        .budget-hidden { display: none; }
+        .spacer-sm { height: 0.5rem; }
+        .spacer-md { height: 1rem; }
+        #userSection { margin-top: 0.5rem; }
+        #profileSection { margin-top: 0.25rem; }
+        .claim-status-text { font-size: 0.85rem; color: #6e6d6a; line-height: 1.4; }
+        .permission-error { background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; color: #721c24; font-size: 0.8rem; }
+        .permission-error code { background: #fff; padding: 0.5rem; border-radius: 4px; font-size: 0.7rem; display: block; white-space: pre-wrap; margin-top: 0.5rem; border: 1px solid #f5c6cb; font-family: monospace; }
+        .btn-fix-rules { background: #1d1d1f; color: white; border: none; padding: 0.5rem 1.5rem; border-radius: 60px; font-weight: 600; font-size: 0.8rem; margin-top: 0.5rem; cursor: pointer; transition: 0.2s; }
+        .btn-fix-rules:hover { background: #f05a2c; color: white; }
+        .brand-image { width: 100%; max-width: 100%; border-radius: 16px; margin-top: 0.5rem; }
+        .signout-btn { flex-shrink: 0; font-size: 0.75rem; border-color: #d9d7d2; background: transparent; color: #6e6d6a; padding: 0.25rem 1rem; border-radius: 60px; border: 1px solid #d9d7d2; transition: 0.2s; }
+        .signout-btn:hover { background: #f0eeea; border-color: #1d1d1f; }
+        .google-icon-wrapper { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex-shrink: 0; }
+        @media (max-width: 480px) {
+            .navbar { padding: 0.75rem 1rem; }
+            .logo { height: 36px; }
+            .event-badge { font-size: 0.6rem; padding: 0.2rem 0.9rem; }
+            .card-redeem { padding: 1.5rem 1.2rem; border-radius: 28px; }
+            .btn-primary-fas, .btn-google { height: 50px; font-size: 0.9rem; }
+            .redeem-amount { font-size: 2.4rem; }
+            .divider { margin: 1.2rem 0; }
+            .profile-pic { width: 36px; height: 36px; font-size: 1.2rem; }
+        }
+        @media (max-width: 380px) {
+            .event-title { font-size: 1.1rem; }
+            .timer-box { font-size: 0.6rem; padding: 0.2rem 0.6rem; }
+            .card-redeem { padding: 1.2rem 1rem; }
+            .profile-pic { width: 32px; height: 32px; font-size: 1rem; }
+        }
+        /* HIDE SENSITIVE INFO FROM CUSTOMERS */
+        .admin-only { display: none !important; }
+        #recentClaims, #claimsList, #redeemCountDisplay, .budget-meter, .budget-label, #budgetUsedDisplay, #budgetMeterFill { display: none !important; }
+        /* Only show claim count as simple text without numbers */
+        .claim-count-simple { font-size: 0.7rem; color: #6e6d6a; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <img src="assets/images/Logo-main-02.png" alt="Fasfood" class="logo" onerror="this.src='https://placehold.co/140x44/1d1d1f/white?text=Fasfood'" />
+    <div>
+        <span class="event-badge">Jika Majika</span>
+    </div>
+</nav>
+
+<div class="hero-redeem">
+    <div class="card-redeem">
+        <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 0.5rem 0.75rem;">
+            <div class="event-title">
+                Claim <span>your</span> discount
+            </div>
+            <span class="timer-box" id="timerDisplay">2:45 PM – 6:00 PM</span>
+        </div>
+
+        <div id="permissionError" style="display:none;" class="permission-error">
+            <strong>⚠️ Connection Error</strong>
+            <p style="margin-top:0.5rem; margin-bottom:0.5rem;">Please refresh the page or try again later.</p>
+            <button onclick="location.reload()" class="btn-fix-rules">🔄 Retry</button>
+        </div>
+
+        <div id="userSection" class="mt-3">
+            <div id="loginSection">
+                <button id="googleSignInBtn" class="btn-google">
+                    <span class="google-icon-wrapper">
+                        <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    </span>
+                    Sign in with Google
+                </button>
+                <div class="spacer-sm"></div>
+                <p class="text-muted-fas" style="font-size:0.7rem; margin-bottom:0; text-align:center;">One redeem per customer</p>
+            </div>
+            <div id="profileSection" style="display: none;" class="d-flex align-items-center gap-3 bg-soft mt-2">
+                <div id="userProfilePic" class="profile-pic default">👤</div>
+                <div class="flex-grow-1" style="min-width:0;">
+                    <div id="userDisplayName" class="fw-semibold" style="font-size:0.9rem; word-break:break-word;">User</div>
+                    <div id="userEmail" class="text-muted-fas" style="font-size:0.7rem; word-break:break-word;">email</div>
+                </div>
+                <button id="signOutBtn" class="signout-btn" style="display:none;">Sign out</button>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="text-center">
+            <button id="redeemBtn" class="btn-primary-fas" disabled>Sign in to redeem</button>
+            <div class="spacer-md"></div>
+            <div id="redeemResult" style="min-height: 70px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <span class="claim-status-text">Sign in with Google to claim your discount</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="d-flex justify-content-between flex-wrap" style="font-size:0.7rem; color:#6e6d6a; letter-spacing:0.2px; gap:0.25rem 0.5rem;">
+            <span>16 June 2026</span>
+            <span>Gugulethu Fasfood</span>
+            <span id="redeemCountDisplay" style="display:none;">0 claimed</span>
+        </div>
+        <div class="spacer-sm"></div>
+        
+        <div class="p-2" style="background:#f8f6f2; border-radius:60px; text-align:center; font-size:0.7rem; color:#6e6d6a; line-height:1.4;">
+            Show your discount amount at the till
+        </div>
+
+        <div class="divider"></div>
+        <img src="assets/images/devices.png" alt="Jika Majika" class="brand-image" onerror="this.src='https://placehold.co/480x160/f05a2c/white?text=Jika+Majika+Event'" />
+    </div>
+</div>
+
+<div id="toast" class="toast-message"></div>
+
+<footer class="footer">
+    powered by <strong>96 studios</strong>
+</footer>
+
+<script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
+    import { 
+        getFirestore, 
+        collection, 
+        doc, 
+        getDoc, 
+        setDoc, 
+        updateDoc, 
+        onSnapshot, 
+        query, 
+        orderBy, 
+        limit,
+        runTransaction,
+        serverTimestamp,
+        increment
+    } from "firebase/firestore";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtyKsnDKifjVNyYl1nd5HQ9xKyOQLXJyk",
+        authDomain: "redeem-dc1e7.firebaseapp.com",
+        projectId: "redeem-dc1e7",
+        storageBucket: "redeem-dc1e7.firebasestorage.app",
+        messagingSenderId: "805248357362",
+        appId: "1:805248357362:web:405025aac860013302916b",
+        measurementId: "G-CPWLH7BCRH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginSection = document.getElementById('loginSection');
+    const profileSection = document.getElementById('profileSection');
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userEmail = document.getElementById('userEmail');
+    const userProfilePic = document.getElementById('userProfilePic');
+    const signInBtn = document.getElementById('googleSignInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const redeemBtn = document.getElementById('redeemBtn');
+    const redeemResult = document.getElementById('redeemResult');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const toast = document.getElementById('toast');
+    const permissionError = document.getElementById('permissionError');
+
+    const TOTAL_BUDGET = 200;
+    const EVENT_START = new Date('2026-06-16T14:45:00+02:00');
+    const EVENT_END = new Date('2026-06-16T18:00:00+02:00');
+    const COLLECTION_NAME = 'redeemRecords';
+    const BUDGET_DOC_ID = 'budget';
+
+    let currentUser = null;
+    let userRedeemed = false;
+    let userAmount = 0;
+    let isEventActive = false;
+    let budgetRemaining = TOTAL_BUDGET;
+    let isInitialized = false;
+    let hasPermission = true;
+
+    function showToast(msg, duration = 3000) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function checkEventTime() {
+        const now = new Date();
+        const active = now >= EVENT_START && now < EVENT_END;
+        isEventActive = active;
+
+        if (now < EVENT_START) {
+            const diff = EVENT_START - now;
+            const mins = Math.floor(diff / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            timerDisplay.textContent = `Starts in ${mins}m ${secs}s`;
+        } else if (now >= EVENT_END) {
+            timerDisplay.textContent = 'Event ended';
+        } else {
+            const diff = EVENT_END - now;
+            const mins = Math.floor(diff / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            timerDisplay.textContent = `${mins}m ${secs}s left`;
+        }
+        return active;
+    }
+    setInterval(() => {
+        checkEventTime();
+        updateRedeemButtonState();
+    }, 1000);
+
+    async function initializeFirestore() {
+        try {
+            const budgetDoc = doc(db, COLLECTION_NAME, BUDGET_DOC_ID);
+            const docSnap = await getDoc(budgetDoc);
+            
+            if (!docSnap.exists()) {
+                console.log('Creating budget document...');
+                await setDoc(budgetDoc, {
+                    totalBudget: TOTAL_BUDGET,
+                    totalRedeemed: 0,
+                    remainingBudget: TOTAL_BUDGET,
+                    createdAt: serverTimestamp()
+                });
+                console.log('✅ Budget document created');
+            } else {
+                console.log('✅ Budget document already exists');
+                const data = docSnap.data();
+                if (!data.remainingBudget) {
+                    await updateDoc(budgetDoc, {
+                        remainingBudget: TOTAL_BUDGET
+                    });
+                }
+            }
+            isInitialized = true;
+            hasPermission = true;
+            permissionError.style.display = 'none';
+            return true;
+        } catch (error) {
+            console.error('Error initializing Firestore:', error);
+            if (error.code === 'permission-denied') {
+                hasPermission = false;
+                permissionError.style.display = 'block';
+                showToast('⚠️ Connection error. Please refresh.', 6000);
+            } else {
+                showToast('⚠️ Database connection error: ' + error.message, 5000);
+            }
+            return false;
+        }
+    }
+
+    function listenForRecords() {
+        // Only listen for the current user's record - no public data shown
+        onSnapshot(
+            query(collection(db, COLLECTION_NAME), orderBy('timestamp', 'desc'), limit(1)),
+            (snapshot) => {
+                // Do NOT display any claim data to customers
+                // This is purely for internal budget tracking
+                const records = [];
+                snapshot.forEach((doc) => {
+                    if (doc.id !== BUDGET_DOC_ID) {
+                        records.push({
+                            id: doc.id,
+                            data: doc.data()
+                        });
+                    }
+                });
+                
+                // Update budget internally
+                let totalClaimed = 0;
+                // We need to get total from budget doc instead
+                const budgetDoc = doc(db, COLLECTION_NAME, BUDGET_DOC_ID);
+                getDoc(budgetDoc).then(docSnap => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        budgetRemaining = data.remainingBudget || TOTAL_BUDGET;
+                    }
+                }).catch(err => console.warn('Could not get budget:', err));
+                
+                // Check if current user has claimed
+                if (currentUser) {
+                    const userRecord = records.find(r => r.data.uid === currentUser.uid);
+                    if (userRecord) {
+                        userRedeemed = true;
+                        userAmount = userRecord.data.amount || 0;
+                        redeemBtn.disabled = true;
+                        redeemBtn.textContent = 'Already claimed';
+                        redeemResult.innerHTML = `<span class="redeem-amount">R${userAmount.toFixed(2)}</span><span style="display:block;font-size:0.75rem;color:#6e6d6a;margin-top:0.25rem;">claimed · show to cashier</span>`;
+                    } else {
+                        userRedeemed = false;
+                        updateRedeemButtonState();
+                    }
+                }
+            }, (error) => {
+                console.error('Error listening to records:', error);
+                if (error.code === 'permission-denied') {
+                    hasPermission = false;
+                    permissionError.style.display = 'block';
+                }
+            }
+        );
+    }
+
+    function updateRedeemButtonState() {
+        if (!currentUser) {
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Sign in to redeem';
+            return;
+        }
+        if (userRedeemed) {
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Already claimed';
+            return;
+        }
+        if (!isEventActive) {
+            redeemBtn.disabled = true;
+            const now = new Date();
+            redeemBtn.textContent = now < EVENT_START ? 'Event starts at 2:45 PM' : 'Event ended';
+            return;
+        }
+        if (budgetRemaining <= 0) {
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Fully claimed';
+            return;
+        }
+        if (!isInitialized || !hasPermission) {
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Connecting...';
+            return;
+        }
+        redeemBtn.disabled = false;
+        redeemBtn.textContent = 'Claim your discount';
+    }
+
+    function calculateGuaranteedAmount(claimNumber, remainingBudget) {
+        let amount;
+        if (claimNumber === 1) amount = 20;
+        else if (claimNumber === 2) amount = 16;
+        else if (claimNumber === 3) amount = 13;
+        else if (claimNumber === 4) amount = 10;
+        else if (claimNumber === 5) amount = 8;
+        else if (claimNumber === 6) amount = 7;
+        else if (claimNumber === 7) amount = 6;
+        else if (claimNumber === 8) amount = 5;
+        else if (claimNumber === 9) amount = 4.50;
+        else if (claimNumber === 10) amount = 4;
+        else if (claimNumber === 11) amount = 3.50;
+        else if (claimNumber === 12) amount = 3;
+        else if (claimNumber === 13) amount = 2.50;
+        else if (claimNumber === 14) amount = 2;
+        else if (claimNumber === 15) amount = 1.50;
+        else if (claimNumber === 16) amount = 1.50;
+        else if (claimNumber === 17) amount = 1.50;
+        else if (claimNumber === 18) amount = 1;
+        else if (claimNumber === 19) amount = 1;
+        else if (claimNumber === 20) amount = 1;
+        else if (claimNumber === 21) amount = 1;
+        else if (claimNumber === 22) amount = 1;
+        else if (claimNumber === 23) amount = 0.50;
+        else if (claimNumber === 24) amount = 0.50;
+        else if (claimNumber === 25) amount = 0.50;
+        else if (claimNumber === 26) amount = 0.50;
+        else if (claimNumber === 27) amount = 0.50;
+        else if (claimNumber === 28) amount = 0.50;
+        else if (claimNumber === 29) amount = 0.50;
+        else if (claimNumber === 30) amount = 0.50;
+        else if (claimNumber === 31) amount = 0.50;
+        else if (claimNumber === 32) amount = 0.50;
+        else if (claimNumber === 33) amount = 0.50;
+        else if (claimNumber === 34) amount = 0.50;
+        else if (claimNumber === 35) amount = 0.50;
+        else if (claimNumber === 36) amount = 0.50;
+        else if (claimNumber === 37) amount = 0.50;
+        else if (claimNumber === 38) amount = 0.50;
+        else if (claimNumber === 39) amount = 0.50;
+        else if (claimNumber === 40) amount = 0.50;
+        else amount = 0.50;
+
+        amount = Math.min(amount, remainingBudget);
+        amount = Math.round(amount * 100) / 100;
+        
+        if (remainingBudget < amount && remainingBudget > 0) {
+            amount = Math.round(remainingBudget * 100) / 100;
+        }
+        
+        if (remainingBudget >= 0.50 && amount < 0.50) amount = 0.50;
+        
+        return amount;
+    }
+
+    async function performRedeem() {
+        if (!currentUser) { showToast('Please sign in first.', 2500); return; }
+        if (userRedeemed) { showToast('You already claimed your discount.', 2500); return; }
+        if (!isEventActive) { showToast('Event is not active.', 2500); return; }
+        if (budgetRemaining <= 0) { showToast('All discounts claimed!', 2500); return; }
+        if (!isInitialized || !hasPermission) { 
+            showToast('System not ready. Please refresh.', 2500); 
+            return; 
+        }
+
+        redeemBtn.disabled = true;
+        redeemBtn.textContent = 'Processing...';
+
+        const uid = currentUser.uid;
+        const email = currentUser.email || 'no-email';
+        const displayName = currentUser.displayName || 'User';
+
+        try {
+            const recordRef = doc(db, COLLECTION_NAME, uid);
+            const budgetRef = doc(db, COLLECTION_NAME, BUDGET_DOC_ID);
+
+            let awardedAmount = 0;
+            let claimNumber = 0;
+
+            await runTransaction(db, async (transaction) => {
+                const recordSnap = await transaction.get(recordRef);
+                if (recordSnap.exists()) {
+                    throw new Error('Already redeemed');
+                }
+
+                const budgetSnap = await transaction.get(budgetRef);
+                if (!budgetSnap.exists()) {
+                    throw new Error('Budget not initialized');
+                }
+
+                const budgetData = budgetSnap.data();
+                const remaining = budgetData.remainingBudget || TOTAL_BUDGET;
+                
+                if (remaining <= 0) {
+                    throw new Error('Budget exhausted');
+                }
+
+                const currentClaims = budgetData.totalRedeemed || 0;
+                claimNumber = currentClaims + 1;
+
+                awardedAmount = calculateGuaranteedAmount(claimNumber, remaining);
+
+                if (awardedAmount > remaining) {
+                    awardedAmount = remaining;
+                }
+                awardedAmount = Math.round(awardedAmount * 100) / 100;
+
+                transaction.set(recordRef, {
+                    uid: uid,
+                    email: email,
+                    name: displayName,
+                    amount: awardedAmount,
+                    claimNumber: claimNumber,
+                    timestamp: serverTimestamp()
+                });
+
+                transaction.update(budgetRef, {
+                    remainingBudget: Math.max(0, remaining - awardedAmount),
+                    totalRedeemed: increment(1)
+                });
+            });
+
+            userRedeemed = true;
+            userAmount = awardedAmount;
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Already claimed';
+            redeemResult.innerHTML = `<span class="redeem-amount">R${awardedAmount.toFixed(2)}</span><span style="display:block;font-size:0.75rem;color:#6e6d6a;margin-top:0.25rem;">claimed · show to cashier</span>`;
+            showToast(`You got R${awardedAmount.toFixed(2)}! Show at till.`, 4000);
+
+            // Update budget remaining
+            budgetRemaining = Math.max(0, budgetRemaining - awardedAmount);
+
+        } catch (error) {
+            console.error('Redeem error:', error);
+            if (error.message === 'Already redeemed') {
+                showToast('You already claimed your discount.', 2500);
+                userRedeemed = true;
+            } else if (error.message === 'Budget exhausted') {
+                showToast('All discounts have been claimed! 🎉', 2500);
+            } else if (error.message === 'Budget not initialized') {
+                showToast('System error. Please refresh.', 3000);
+                await initializeFirestore();
+            } else {
+                showToast('Error: ' + error.message, 3000);
+            }
+            redeemBtn.disabled = false;
+            redeemBtn.textContent = 'Claim your discount';
+        }
+        updateRedeemButtonState();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            loginSection.style.display = 'none';
+            profileSection.style.display = 'flex';
+            signOutBtn.style.display = 'block';
+            
+            userDisplayName.textContent = user.displayName || 'User';
+            userEmail.textContent = user.email || '';
+            
+            if (user.photoURL) {
+                userProfilePic.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+                userProfilePic.className = 'profile-pic';
+            } else {
+                userProfilePic.textContent = '👤';
+                userProfilePic.className = 'profile-pic default';
+            }
+            
+            try {
+                const recordRef = doc(db, COLLECTION_NAME, user.uid);
+                const recordSnap = await getDoc(recordRef);
+                if (recordSnap.exists()) {
+                    const data = recordSnap.data();
+                    userRedeemed = true;
+                    userAmount = data.amount || 0;
+                    redeemBtn.disabled = true;
+                    redeemBtn.textContent = 'Already claimed';
+                    redeemResult.innerHTML = `<span class="redeem-amount">R${userAmount.toFixed(2)}</span><span style="display:block;font-size:0.75rem;color:#6e6d6a;margin-top:0.25rem;">claimed · show to cashier</span>`;
+                } else {
+                    userRedeemed = false;
+                    redeemResult.innerHTML = `<span class="claim-status-text">Click to claim your discount</span>`;
+                }
+            } catch (error) {
+                console.error('Error checking user record:', error);
+            }
+            updateRedeemButtonState();
+        } else {
+            currentUser = null;
+            loginSection.style.display = 'block';
+            profileSection.style.display = 'none';
+            signOutBtn.style.display = 'none';
+            userRedeemed = false;
+            redeemBtn.disabled = true;
+            redeemBtn.textContent = 'Sign in to redeem';
+            redeemResult.innerHTML = `<span class="claim-status-text">Sign in with Google to claim your discount</span>`;
+        }
+    });
+
+    signInBtn.addEventListener('click', () => {
+        signInWithPopup(auth, provider).catch(err => {
+            console.error('Google sign in error:', err);
+            if (err.code === 'auth/unauthorized-domain') {
+                showToast('Domain not authorized. Please contact support.', 5000);
+            } else {
+                showToast('Sign in failed: ' + err.message, 3000);
+            }
+        });
+    });
+
+    signOutBtn.addEventListener('click', () => {
+        signOut(auth).then(() => showToast('Signed out.', 2000));
+    });
+
+    redeemBtn.addEventListener('click', performRedeem);
+
+    async function init() {
+        await initializeFirestore();
+        listenForRecords();
+        checkEventTime();
+        setInterval(() => {
+            checkEventTime();
+            updateRedeemButtonState();
+        }, 5000);
+        setTimeout(() => updateRedeemButtonState(), 500);
+        
+        console.log('✅ Jika Majika redeem - Customer view (NO budget info shown)');
+        console.log(`Event: ${EVENT_START.toLocaleString()} → ${EVENT_END.toLocaleString()}`);
+        console.log('Total budget: R' + TOTAL_BUDGET + ' (hidden from customers)');
+    }
+
+    init();
+</script>
+</body>
+</html>
